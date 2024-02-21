@@ -96,6 +96,9 @@ tax_sequences2 <- "data/taxsequences.fna.unfiltered"
 
 vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
 
+
+fns <- list.files(paste(path, path1, sep = ""))
+
 fastqs <- fns[grepl(".fastq$", fns)]
 
 fastqs <- sort(fastqs) # Sorting fastqs so that Forward (R1) and Reverse (R2) reads correspond to each other.
@@ -300,3 +303,4 @@ colnames(blasttable) <- c("qseq", "qid", "sid", "pident", "length", "mismatch", 
 blast_out<-"data-raw/blastout.csv"
 
 write.csv(blasttable,file=paste0(path,blast_out))
+
