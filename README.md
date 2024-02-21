@@ -24,7 +24,9 @@ You can learn how to do so in this official tutorial by NCBI: [BLAST® Command L
 
 ### **Step four:** Open the script MitoSonar_script.r in RStudio
 In the first portion of the script, it will guide you through some package installation steps.
+
 Be aware that you might need to install some dependencies **manually**!
+
 *I must say I kinda feel sorry for you, but just be patient and it should work fine. (Be warned: **dada2** can be pretty tricky to set up in the first use)*
 
-After installing dependencies, set 'work-dir' as working directy and voila! **Time to fish**
+After installing dependencies, set 'work-dir' as working directory and voila! **Time to fish**
