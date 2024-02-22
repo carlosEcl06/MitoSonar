@@ -1,0 +1,81 @@
+---
+output:
+  pdf_document: default
+---
+
+![](work-dir/data/images/assets/catg_header.png)
+
+#           Laudo Metagenômico
+
+## Resumo do Projeto
+
+Nome do projeto: Metabarcoding 12s de Peixes.
+
+Resumo do projeto: Identificação taxonômica de peixes através de comparação de amostras da região 12s do DNA mitocondrial contra um banco de dados de espécies conhecidas.
+
+Versão do Relatório: 1.0
+
+Data: `r format(Sys.time(), '%d/%m/%y')`
+
+Amostras: No total X amostras pair-end de eDNA foram sequenciadas e analisadas em metabarcoding. Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Institute, University of Tokyo, Japan.
+
+## Workflow da análise
+
+### *Sequenciamento*
+
+As amostras foram sequenciadas utilizando a metodologia de sequenciamento do gene 12S do DNA mitocondrial. O sequenciamento foi realizado no equipamento X com comprimentos de leituras geradas em x X y.
+
+### *Análise Bioinformática*
+
+Após o final do sequenciamento, foram executadas as análises bioinformáticas. Inicialmente as leituras geradas (no formato fastq) passaram por uma avaliação da qualidade das sequências utilizando o pacote R ShortRead. Em seguida, as sequências foram filtradas pela função fastqPairedFilter da ferramenta dada2, que também foi utilizada para a inferência das sequences. Após uma etapa de remoção de quimeras, foram construídas as tabelas de sequences e OTUs, e estas foram comparadas ao banco de dados de referência pelo software BLAST+, do NCBI.
+
+### *Limpeza dos dados*
+
+As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo retirada as sequências de baixa qualidade e adaptadores utilizando funções dos pacotes ShortRead e dada2 do R, nas versões 1.60.0 e 1.30.0, respectivamente. Os seguintes parâmetros foram utilizados:
+
+-   Leituras inteiras com taxa de erro superior a 2 foram removidas;
+-   Leituras tiveram porções com taxa de erro superior a 2 truncadas;
+-   Leituras menores que 100 pares de bases foram removidas;
+-   As primeiras 18 bases foram removidas das leituras.
+
+### *Perfis de qualidade dos dados antes e depois da limpeza das leituras*
+
+*Antes da filtragem*
+
+inserir imagens
+
+*Depois da filtragem*
+
+inserir imagens
+
+### *Identificação de taxonomias*
+
+Para identificação do organismo presente na amostra após o tratamento dos dados, foi utilizada a estratégia de comparação com o banco de dados MiFish.
+
+inserir gráfico das top10 taxonomias
+
+## Conclusão
+
+Ao final da comparação podemos concluir que o material predominate pertence à espécie: ***Gênero espécie***.
+
+Além disso, detectou-se grande presença de traços das espécies ...
+
+## Referências
+
+-   CLAVER, C. et al. An automated workflow to assess completeness and curate GenBank for environmental DNA metabarcoding: The marine fish assemblage as case study. Environmental DNA, v. 5, n. 4, p. 634–647, jul. 2023.
+
+-   KELLY, R. P.; SHELTON, A. O.; GALLEGO, R. Understanding PCR Processes to Draw Meaningful Conclusions from Environmental DNA Studies. Scientific Reports, v. 9, n. 1, p. 12133, 20 ago. 2019.
+
+-   MIYA, M. et al. MiFish, a set of universal PCR primers for metabarcoding environmental DNA from fishes: detection of more than 230 subtropical marine species. Royal Society Open Science, v. 2, n. 7, p. 150088, jul. 2015.
+
+-   RIAZ, T. et al. ecoPrimers: inference of new DNA barcode markers from whole genome sequence analysis. Nucleic Acids Research, v. 39, n. 21, p. e145–e145, 1 nov. 2011.
+
+-   STOECKLE, M. Y. et al. Trawl and eDNA assessment of marine fish diversity, seasonality, and relative abundance in coastal New Jersey, USA. ICES Journal of Marine Science, v. 78, n. 1, p. 293–304, 24 mar. 2021.
+
+-   STOECKLE, M. Y. et al. Current laboratory protocols for detecting fish species with environmental DNA optimize sensitivity and reproducibility, especially for more abundant populations. ICES Journal of Marine Science, v. 79, n. 2, p. 403–412, 10 mar. 2022.
+
+-   STOECKLE, M. Y.; AUSUBEL, J. H.; COOGAN, M. 12S Gene Metabarcoding with DNA Standard Quantifies Marine Bony Fish Environmental DNA, Identifies Threshold for Reproducible Amplification, and Overcomes Distortion Due to Non-Fish Vertebrate DNA. [s.l.] Ecology, 2 ago. 2022. Disponível em: <http://biorxiv.org/lookup/doi/10.1101/2022.07.29.502053>. Acesso em: 13 dez. 2023.
+
+-   STOECKLE, M. Y.; DAS MISHU, M.; CHARLOP-POWERS, Z. Improved Environmental DNA Reference Library Detects Overlooked Marine Fishes in New Jersey, United States. Frontiers in Marine Science, v. 7, p. 226, 5 maio 2020.
+
+-   STOECKLE, M. Y.; SOBOLEVA, L.; CHARLOP-POWERS, Z. Aquatic environmental DNA detects seasonal fish abundance and habitat preference in an urban estuary. PLOS ONE, v. 12, n. 4, p. e0175186, 12 abr. 2017.

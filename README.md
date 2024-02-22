@@ -8,10 +8,12 @@
     Use this tree as reference:
 
     work-dir/
-        ├── data/ <- this folder will store the generated OTU and taxonomy tables and the .fna of filtered sequences for blasting
+        ├── data/
+        │   └── images/
+        │       ├── assets/
+        │       └── plots/
         └── data-raw/
-            ├── MiFish_all_mitogenomes.fasta <- fasta for creating blast database
-            └── fastqs/ <- sequences to analyse must be placed into this folder
+            └── fastqs <- sequences to analyse must be placed into this folder
 
 NOTE: the blast output table will be created under the 'data-raw' folder
 

@@ -111,19 +111,28 @@ fnRs <- fastqs[grepl("_R2", fastqs)]
 
 ### Visualize the quality profile of the forward reads: 
 
-for(fnF in fnFs[1:1]) {
+for(fnF in fnFs) {
+  fastq_name <- sub("sep_R1_001.fastq$", "", fnF)
+  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+  png(filename = paste0(sample_dir,"/",fastq_name,"_forward_quality.png"), width = 800, height = 600)
   print(fnF)
   qqF <- qa(paste0(path, path1, fnF))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqF, main="Forward")) 
+  print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile"))
+  dev.off()
 } 
-
-
 
 ### Visualize the quality profile of the reverse reads: 
 
-for(fnR in fnRs[1:1]) {
+for(fnR in fnRs) {
+  fastq_name <- sub("sep_R2_001.fastq$", "", fnR)
+  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+  png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_quality.png"), width = 800, height = 600)
+  print(fnR)
   qqR <- qa(paste0(path, path1, fnR))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse")) 
+  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile")) 
+  dev.off()
 } 
 
 
@@ -139,6 +148,34 @@ filtRs <- paste0(path, sapply(strsplit(fnRs, "\\."), `[`, 1), "_filt.fastq.gz")
 for(i in seq_along(fnFs)) { #Adjust parameters according to quality profiles
   fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=0, maxEE=2, truncQ=2, trimLeft=c(18, 18), truncLen=c(100,100), compress=TRUE, verbose=TRUE)
 }
+
+### Visualize the quality profile of the forward reads after filtering: 
+
+for(fnF in filtFs) {
+  fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnF)
+  fastq_name <- sub("sep_R1_001_filt.fastq.gz$", "", fastq_name)
+  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+  png(filename = paste0(sample_dir,"/",fastq_name,"_forward_filtered_quality.png"), width = 800, height = 600)
+  print(fnF)
+  qqF <- qa(paste0(fnF))[["perCycle"]]$quality
+  print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile after filtering"))
+  dev.off()
+} 
+
+### Visualize the quality profile of the reverse reads after filtering: 
+
+for(fnR in filtRs) {
+  fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnR)
+  fastq_name <- sub("sep_R2_001_filt.fastq.gz$", "", fastq_name)
+  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+  png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_filtered_quality.png"), width = 800, height = 600)
+  print(fnR)
+  qqR <- qa(paste0(fnR))[["perCycle"]]$quality
+  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile after filtering"))
+  dev.off()
+} 
 
 
 
@@ -172,10 +209,18 @@ dadaRs <- dadainfer(derepRs)
 
 ### Visualize estimated error rates:
 
+png(filename = paste0(path,"data/images/plots/estimErr_A.png"), width = 800, height = 600)
 plotErrors(dadaFs[[1]], "A", nominalQ=TRUE)
+dev.off()
+png(filename = paste0(path,"data/images/plots/estimErr_C.png"), width = 800, height = 600)
 plotErrors(dadaFs[[1]], "C", nominalQ=TRUE)
+dev.off()
+png(filename = paste0(path,"data/images/plots/estimErr_G.png"), width = 800, height = 600)
 plotErrors(dadaFs[[1]], "G", nominalQ=TRUE)
+dev.off()
+png(filename = paste0(path,"data/images/plots/estimErr_T.png"), width = 800, height = 600)
 plotErrors(dadaFs[[1]], "T", nominalQ=TRUE)
+dev.off()
 
 
 
@@ -283,7 +328,9 @@ ps.top10 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 
 ps.top10 <- prune_taxa(top10, ps.top10)
 
+png(filename = paste0(path,"data/images/plots/top10taxa.png"), width = 800, height = 600)
 plot_bar(ps.top10, fill="taxa")
+dev.off()
 
 
 
