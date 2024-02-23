@@ -156,7 +156,7 @@ filtFs <- paste0(path, sapply(strsplit(fnFs, "\\."), `[`, 1), "_filt.fastq.gz")
 filtRs <- paste0(path, sapply(strsplit(fnRs, "\\."), `[`, 1), "_filt.fastq.gz") 
 
 for(i in seq_along(fnFs)) { #Adjust parameters according to quality profiles
-  fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=maxN, maxEE=maxEE, truncQ=truncQ, trimLeft=c(trimLeft,trimLeft), truncLen=c(truncLen,truncLen), compress=TRUE, verbose=TRUE)
+  fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=maxN, maxEE=maxEE, truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=c(truncLen,truncLen), compress=TRUE, verbose=TRUE)
 }
 
 ### Visualize the quality profile of the forward reads after filtering: 
