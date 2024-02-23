@@ -30,11 +30,11 @@ while getopts "hdm:ql:t:e:" opt; do
    case "$opt" in
       h ) helpFunction ;;
       d ) echo -e "running default settings";;
-      m ) maxN="${OPTARG:-0}" ;;
-      q ) truncQ="${OPTARG:-2}" ;;
-      l ) truncLen="${OPTARG:-100}" ;;
-      t ) trimLeft="${OPTARG:-18}" ;;
-      e ) maxEE="${OPTARG:-2}" ;;
+      m ) maxN="${OPTARG:}" ;;
+      q ) truncQ="${OPTARG:}" ;;
+      l ) truncLen="${OPTARG:}" ;;
+      t ) trimLeft="${OPTARG:}" ;;
+      e ) maxEE="${OPTARG:}" ;;
       \? ) echo -e "Opção inválida: -$OPTARG" >&2; helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
