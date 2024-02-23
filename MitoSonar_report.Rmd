@@ -3,9 +3,11 @@ output:
   pdf_document: default
 ---
 
-![](work-dir/data/images/assets/catg_header.png)
+![](work-dir/data/images/assets/catg_header.png){width="536"}
 
-#           Laudo Metagenômico
+# Laudo Metagenômico
+
+![](work-dir/data/images/assets/Logo.jpeg){width="167"}
 
 ## Resumo do Projeto
 

@@ -1,5 +1,17 @@
 ### MitoSonar: 12S metabarcoding-based Fish Taxonomy Identifier
 
+### Obtaining input
+arguments <- commandArgs(trailingOnly = TRUE)
+
+## Filtering parameters
+maxN = arguments[1]
+truncQ = arguments[2]
+truncLen = arguments[3]
+trimLeft = arguments[4]
+maxEE = arguments[5]
+
+cat(arguments,sep="\n")
+
 
 
 #Every few months you should uninstall and reinstall the packages you will be using to ensure they are most recent versions.
