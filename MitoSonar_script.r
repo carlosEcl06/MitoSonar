@@ -10,6 +10,12 @@ truncLen = arguments[3]
 trimLeft = arguments[4]
 maxEE = arguments[5]
 
+## Defaults for testing
+maxN=0
+truncQ=2
+truncLen=100
+trimLeft=18
+maxEE=2
 
 
 #Every few months you should uninstall and reinstall the packages you will be using to ensure they are most recent versions.
@@ -122,7 +128,7 @@ fnRs <- fastqs[grepl("_R2", fastqs)]
 ### Visualize the quality profile of the forward reads: 
 
 for(fnF in fnFs) {
-  fastq_name <- sub("sep_R1_001.fastq$", "", fnF)
+  fastq_name <- sub("_R1_001.fastq$", "", fnF)
   sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
   if(!dir.exists(sample_dir)){dir.create(sample_dir)}
   png(filename = paste0(sample_dir,"/",fastq_name,"_forward_quality.png"), width = 800, height = 600)
@@ -135,7 +141,7 @@ for(fnF in fnFs) {
 ### Visualize the quality profile of the reverse reads: 
 
 for(fnR in fnRs) {
-  fastq_name <- sub("sep_R2_001.fastq$", "", fnR)
+  fastq_name <- sub("_R2_001.fastq$", "", fnR)
   sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
   if(!dir.exists(sample_dir)){dir.create(sample_dir)}
   png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_quality.png"), width = 800, height = 600)
@@ -163,7 +169,7 @@ for(i in seq_along(fnFs)) { #Adjust parameters according to quality profiles
 
 for(fnF in filtFs) {
   fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnF)
-  fastq_name <- sub("sep_R1_001_filt.fastq.gz$", "", fastq_name)
+  fastq_name <- sub("_R1_001_filt.fastq.gz$", "", fastq_name)
   sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
   if(!dir.exists(sample_dir)){dir.create(sample_dir)}
   png(filename = paste0(sample_dir,"/",fastq_name,"_forward_filtered_quality.png"), width = 800, height = 600)
@@ -177,7 +183,7 @@ for(fnF in filtFs) {
 
 for(fnR in filtRs) {
   fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnR)
-  fastq_name <- sub("sep_R2_001_filt.fastq.gz$", "", fastq_name)
+  fastq_name <- sub("_R2_001_filt.fastq.gz$", "", fastq_name)
   sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
   if(!dir.exists(sample_dir)){dir.create(sample_dir)}
   png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_filtered_quality.png"), width = 800, height = 600)
@@ -204,8 +210,6 @@ sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
 names(derepFs) <- sam_names
 names(derepRs) <- sam_names
 
-
-
 ### Sample Inference by DADA2
 
 dadainfer <- function(derepFastqs){
@@ -219,18 +223,27 @@ dadaRs <- dadainfer(derepRs)
 
 ### Visualize estimated error rates:
 
-png(filename = paste0(path,"data/images/plots/estimErr_A.png"), width = 800, height = 600)
-plotErrors(dadaFs[[1]], "A", nominalQ=TRUE)
-dev.off()
-png(filename = paste0(path,"data/images/plots/estimErr_C.png"), width = 800, height = 600)
-plotErrors(dadaFs[[1]], "C", nominalQ=TRUE)
-dev.off()
-png(filename = paste0(path,"data/images/plots/estimErr_G.png"), width = 800, height = 600)
-plotErrors(dadaFs[[1]], "G", nominalQ=TRUE)
-dev.off()
-png(filename = paste0(path,"data/images/plots/estimErr_T.png"), width = 800, height = 600)
-plotErrors(dadaFs[[1]], "T", nominalQ=TRUE)
-dev.off()
+if (length(dadaFs) > 1){
+  i=1
+  for (obj in dadaFs){
+    sam <- sam_names[i]
+    sample_dir <- paste0(path,"data/images/plots/",sam,"_estimated_errors")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",sam,"_estimErr_A.png"), width = 800, height = 600)
+    plotErrors(obj, "A", nominalQ=TRUE)
+    dev.off()
+    png(filename = paste0(sample_dir,"/",sam,"_estimErr_C.png"), width = 800, height = 600)
+    plotErrors(obj, "C", nominalQ=TRUE)
+    dev.off()
+    png(filename = paste0(sample_dir,"/",sam,"_estimErr_G.png"), width = 800, height = 600)
+    plotErrors(obj, "G", nominalQ=TRUE)
+    dev.off()
+    png(filename = paste0(sample_dir,"/",sam,"_estimErr_T.png"), width = 800, height = 600)
+    plotErrors(obj, "T", nominalQ=TRUE)
+    dev.off()
+    i=i+1
+  }
+}
 
 
 
