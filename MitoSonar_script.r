@@ -73,6 +73,8 @@ maxEE=2
 
 ### Loading Packages
 
+system(paste("echo Loading R Packages..."))
+
 library(BiocManager); packageVersion("BiocManager") 
 
 library(dada2); packageVersion("dada2")
@@ -127,6 +129,8 @@ fnRs <- fastqs[grepl("_R2", fastqs)]
 
 ### Visualize the quality profile of the forward reads: 
 
+system(paste("echo Examining quality profiles of forward reads..."))
+
 for(fnF in fnFs) {
   fastq_name <- sub("_R1_001.fastq$", "", fnF)
   sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
@@ -140,6 +144,8 @@ for(fnF in fnFs) {
 
 ### Visualize the quality profile of the reverse reads: 
 
+system(paste("echo Examining quality profiles of reverse reads..."))
+
 for(fnR in fnRs) {
   fastq_name <- sub("_R2_001.fastq$", "", fnR)
   sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
@@ -151,11 +157,13 @@ for(fnR in fnRs) {
   dev.off()
 } 
 
-
+system(paste("echo Quality reports saved into 'work-dir/data/images/plots'"))
 
 ### Filtering and trimming 
 
 ### Filter the forward and reverse reads: 
+
+system(paste("echo Filtering and Trimming..."))
 
 filtFs <- paste0(path, sapply(strsplit(fnFs, "\\."), `[`, 1), "_filt.fastq.gz") 
 
@@ -166,6 +174,8 @@ for(i in seq_along(fnFs)) { #Adjust parameters according to quality profiles
 }
 
 ### Visualize the quality profile of the forward reads after filtering: 
+
+system(paste("echo Examining quality profiles after filtering..."))
 
 for(fnF in filtFs) {
   fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnF)
@@ -193,11 +203,15 @@ for(fnR in filtRs) {
   dev.off()
 } 
 
+system(paste("echo Quality reports have been sent to 'work-dir/data/images/plots'"))
+
 
 
 ### Dereplication 
 
 ### Dereplicate the filtered fastq files:
+
+system(paste("echo Derreplicating FASTQs..."))
 
 derepFs <- lapply(filtFs, derepFastq, verbose=TRUE) 
 derepRs <- lapply(filtRs, derepFastq, verbose=TRUE)
@@ -212,6 +226,8 @@ names(derepRs) <- sam_names
 
 ### Sample Inference by DADA2
 
+system(paste("echo Initiating inference phase..."))
+
 dadainfer <- function(derepFastqs){
   dada(derepFastqs, err=inflateErr(tperr1,3), errorEstimationFunction=loessErrfun, selfConsist = TRUE)
 }
@@ -223,31 +239,41 @@ dadaRs <- dadainfer(derepRs)
 
 ### Visualize estimated error rates:
 
-if (length(dadaFs) > 1){
+system(paste("echo Drawing estimated error rates plots..."))
+
+estimErrPng <- function(dadaObj,samId,sample_dir,acgtBase) {
+  png(filename = paste0(sample_dir,"/",samId,"_estimErr_",acgtBase,".png"), width = 800, height = 600)
+  plotErrors(dadaObj, acgtBase, nominalQ=TRUE)
+  dev.off()
+}
+
+if (length(dadaFs) > 1) {
   i=1
-  for (obj in dadaFs){
-    sam <- sam_names[i]
-    sample_dir <- paste0(path,"data/images/plots/",sam,"_estimated_errors")
+  while (i <= length(sam_names)) {
+    sample_dir <- paste0(path,"data/images/plots/",sam_names[i],"_estimated_errors")
     if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-    png(filename = paste0(sample_dir,"/",sam,"_estimErr_A.png"), width = 800, height = 600)
-    plotErrors(obj, "A", nominalQ=TRUE)
-    dev.off()
-    png(filename = paste0(sample_dir,"/",sam,"_estimErr_C.png"), width = 800, height = 600)
-    plotErrors(obj, "C", nominalQ=TRUE)
-    dev.off()
-    png(filename = paste0(sample_dir,"/",sam,"_estimErr_G.png"), width = 800, height = 600)
-    plotErrors(obj, "G", nominalQ=TRUE)
-    dev.off()
-    png(filename = paste0(sample_dir,"/",sam,"_estimErr_T.png"), width = 800, height = 600)
-    plotErrors(obj, "T", nominalQ=TRUE)
-    dev.off()
+    estimErrPng(dadaFs[[i]],sam_names[i],sample_dir,"A")
+    estimErrPng(dadaFs[[i]],sam_names[i],sample_dir,"C")
+    estimErrPng(dadaFs[[i]],sam_names[i],sample_dir,"G")
+    estimErrPng(dadaFs[[i]],sam_names[i],sample_dir,"T")
     i=i+1
   }
+}else {
+  sample_dir <- paste0(path,"data/images/plots/",sam_names,"_estimated_errors")
+  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+  estimErrPng(dadaFs,sam_names,sample_dir,"A")
+  estimErrPng(dadaFs,sam_names,sample_dir,"C")
+  estimErrPng(dadaFs,sam_names,sample_dir,"G")
+  estimErrPng(dadaFs,sam_names,sample_dir,"T")
 }
+
+system(paste("echo Plots saved into 'work-dir/data/images/plots'"))
 
 
 
 ### Identify chimeric sequences:
+
+system(paste("echo Removing chimeric sequences..."))
 
 bimFs <- sapply(dadaFs, isBimeraDenovo, verbose=TRUE)
 bimRs <- sapply(dadaRs, isBimeraDenovo, verbose=TRUE)
@@ -271,6 +297,8 @@ mergers.nochim <- mapply(function(mm, bF, bR) mm[!bF[mm$forward] & !bR[mm$revers
 
 ### Constructing the sequence table
 
+system(paste("echo Building tables..."))
+
 seqtab <- makeSequenceTable(mergers.nochim)
 seqtab2 <- seqtab[,nchar(colnames(seqtab)) %in% seq(80,120)]
 
@@ -286,6 +314,8 @@ colnames(otab) <- paste0("Seq_", seq(ncol(otab)))
 
 ### BLAST+
 ### Get Taxonomy Based on Blasting against a known reference 
+
+system(paste("echo Preparing database for taxonomy annotation..."))
 
 writeFasta <- function(seqs, output) { 
   seqsout <- mapply( function(idx, sequence) paste0(">Seq_",idx,"\n",sequence,"\n"), seq(length(seqs)), seqs)
@@ -308,6 +338,8 @@ write.csv(transotab, paste0(path, "data/otutable.csv"))
 ### Making BLAST database
 
 system(paste("/home/carloslima/tools/ncbi-blast-2.15.0+/bin//makeblastdb -dbtype nucl -in", paste0(path,vert_fasta)))
+
+system(paste("echo Blasting..."))
 
 system(paste("/home/carloslima/tools/ncbi-blast-2.15.0+/bin//blastn -query", paste0(path, tax_sequences),  "-db", paste0(path, vert_fasta), "-outfmt '6 qseq qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore' -max_target_seqs 1 -out", paste0(path, blastout)))
 # Additional column headers can be found on https://www.metagenomics.wiki/tools/blast/blastn-output-format-6.
@@ -345,6 +377,8 @@ ps <- phyloseq(otab, taxtab)
 
 ### Plotting top 10 taxa by abundance
 
+system(paste("echo Done! Now plotting top 10 most abundant taxa..."))
+
 top10 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:10]
 
 ps.top10 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
@@ -358,6 +392,8 @@ dev.off()
 
 
 ### Saving taxonomy table into a file
+
+system(paste("echo Saving taxonomy table and blast output..."))
 
 tax_table1<-"data/taxtable.txt"
 write.table(taxtab, file=paste0(path,tax_table1))
@@ -374,3 +410,4 @@ blast_out<-"data-raw/blastout.csv"
 
 write.csv(blasttable,file=paste0(path,blast_out))
 
+system(paste("echo ##### Analysis Complete #####"))
