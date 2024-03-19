@@ -446,3 +446,9 @@ create_report <- function(sample){
                                   trimLeft = trimLeft,
                                   maxEE = maxEE))
 }
+
+for (sampleid in sam_names) {
+  rep_dir <- paste0(path,"reports")
+  if(!dir.exists(rep_dir)){dir.create(rep_dir)}
+  create_report(sampleid)
+}
