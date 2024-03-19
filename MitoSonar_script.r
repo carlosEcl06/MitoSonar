@@ -377,17 +377,33 @@ ps <- phyloseq(otab, taxtab)
 
 ### Plotting top 10 taxa by abundance
 
-system(paste("echo Done! Now plotting top 10 most abundant taxa..."))
+# system(paste("echo Done! Now plotting top 10 most abundant taxa..."))
+# 
+# top10 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:10]
+# 
+# ps.top10 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+# 
+# ps.top10 <- prune_taxa(top10, ps.top10)
+# 
+# png(filename = paste0(path,"data/images/plots/top10taxa.png"), width = 800, height = 600)
+# plot_bar(ps.top10, fill="taxa")
+# dev.off()
 
-top10 <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:10]
 
-ps.top10 <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 
-ps.top10 <- prune_taxa(top10, ps.top10)
+### Plotting most abundant taxonomies by sample
 
-png(filename = paste0(path,"data/images/plots/top10taxa.png"), width = 800, height = 600)
-plot_bar(ps.top10, fill="taxa")
-dev.off()
+system(paste("echo Done! Now plotting most abundant taxonomies by sample..."))
+toptaxa <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:5]
+ps.toptaxa <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
+ps.toptaxa <- prune_taxa(toptaxa, ps.toptaxa)
+
+for (sample_name in row.names(otu_table(ps.toptaxa))){
+  ps.toptaxa_sample <- prune_samples(sample_name, ps.toptaxa)
+  png(filename = paste0(path, "data/images/plots/", sample_name, "_toptaxa.png"), width = 800, height = 600)
+  plot_bar(ps.toptaxa_sample, x = "taxa", y = "Abundance", fill = "taxa", title = paste0("Most abundant taxa for sample ",sample_name))
+  dev.off()
+}
 
 
 
@@ -411,3 +427,22 @@ blast_out<-"data-raw/blastout.csv"
 write.csv(blasttable,file=paste0(path,blast_out))
 
 system(paste("echo ##### Analysis Complete #####"))
+
+
+
+### Calling Rmd for generating reports
+
+create_report <- function(sample){
+  rmarkdown::render(input = "MitoSonar_report.Rmd",
+                    output_format = rmarkdown::pdf_document(),
+                    output_file = paste0(sample,"MSReport"),
+                    output_dir = paste0(path,"reports"),
+                    intermediates_dir = paste0(path,"reports"),
+                    clean = TRUE,
+                    params = list(sample = sample,
+                                  maxN = maxN,
+                                  truncQ = truncQ,
+                                  truncLen = truncLen,
+                                  trimLeft = trimLeft,
+                                  maxEE = maxEE))
+}

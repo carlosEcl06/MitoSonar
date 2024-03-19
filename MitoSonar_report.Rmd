@@ -1,6 +1,13 @@
 ---
 output:
   pdf_document: default
+params:
+  sample: "sample"
+  maxN: "maxN"
+  truncQ: "truncQ"
+  truncLen: "truncLen"
+  trimLeft: "trimLeft"
+  maxEE: "maxEE"
 ---
 
 ![](work-dir/data/images/assets/catg_header.png){width="536"}
@@ -9,11 +16,11 @@ output:
 
 ![](work-dir/data/images/assets/Logo.jpeg){width="167"}
 
-## Resumo do Projeto
+## Resumo do Serviço
 
-Nome do projeto: Metabarcoding 12s de Peixes.
+Nome: MitoSonar - Metabarcoding 12s de Peixes.
 
-Resumo do projeto: Identificação taxonômica de peixes através de comparação de amostras da região 12s do DNA mitocondrial contra um banco de dados de espécies conhecidas.
+Descrição geral: Identificação taxonômica de peixes através de comparação de amostras da região 12s do DNA mitocondrial contra um banco de dados de espécies conhecidas.
 
 Versão do Relatório: 1.0
 
@@ -35,26 +42,33 @@ Após o final do sequenciamento, foram executadas as análises bioinformáticas.
 
 As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo retirada as sequências de baixa qualidade e adaptadores utilizando funções dos pacotes ShortRead e dada2 do R, nas versões 1.60.0 e 1.30.0, respectivamente. Os seguintes parâmetros foram utilizados:
 
--   Leituras inteiras com taxa de erro superior a 2 foram removidas;
--   Leituras tiveram porções com taxa de erro superior a 2 truncadas;
--   Leituras menores que 100 pares de bases foram removidas;
--   As primeiras 18 bases foram removidas das leituras.
+-   Leituras com mais de `r params$maxN` Ns foram removidas;
+-   Leituras com taxa de erros estimados superior a `r params$maxEE` foram removidas;
+-   Leituras contendo porções com taxa de erro superior a `r params$truncQ` truncadas na primeira ocorrência desta;
+-   Leituras menores que `r params$truncLen` pares de bases foram removidas, e as maiores, truncadas;
+-   As primeiras `r params$truncLeft` bases foram removidas das leituras.
 
 ### *Perfis de qualidade dos dados antes e depois da limpeza das leituras*
 
 *Antes da filtragem*
 
-inserir imagens
+```{r, echo=FALSE, out.width = '50%'}
+knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_quality.png"))))
+```
 
 *Depois da filtragem*
 
-inserir imagens
+```{r, echo=FALSE, out.width = '50%'}
+knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_filtered_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_filtered_quality.png"))))
+```
 
 ### *Identificação de taxonomias*
 
 Para identificação do organismo presente na amostra após o tratamento dos dados, foi utilizada a estratégia de comparação com o banco de dados MiFish.
 
-inserir gráfico das top10 taxonomias
+```{r, echo=FALSE, out.width = '50%'}
+knitr::include_graphics(paste0("work-dir/data/images/plots/"))
+```
 
 ## Conclusão
 

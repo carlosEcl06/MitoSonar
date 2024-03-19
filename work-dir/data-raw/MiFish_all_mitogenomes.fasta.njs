@@ -6,7 +6,7 @@
   "description": "/home/carloslima/projects/MitoSonar/work-dir/data-raw/MiFish_all_mitogenomes.fasta",
   "number-of-letters": 67956624,
   "number-of-sequences": 4066,
-  "last-updated": "2024-03-18T14:35:00",
+  "last-updated": "2024-03-19T17:20:00",
   "number-of-volumes": 1,
   "bytes-total": 17494668,
   "bytes-to-cache": 17049032,
