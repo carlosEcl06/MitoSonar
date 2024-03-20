@@ -8,6 +8,8 @@ params:
   truncLen: "truncLen"
   trimLeft: "trimLeft"
   maxEE: "maxEE"
+  species: "Genus species"
+  species2: "Genus species"
 ---
 
 ![](work-dir/data/images/assets/catg_header.png){width="536"}
@@ -66,15 +68,15 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_q
 
 Para identificação do organismo presente na amostra após o tratamento dos dados, foi utilizada a estratégia de comparação com o banco de dados MiFish.
 
-```{r, echo=FALSE, out.width = '50%'}
-knitr::include_graphics(paste0("work-dir/data/images/plots/"))
+```{r, echo=FALSE, out.width = '75%'}
+knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_toptaxa.png"))
 ```
 
 ## Conclusão
 
-Ao final da comparação podemos concluir que o material predominate pertence à espécie: ***Gênero espécie***.
+Ao final da comparação podemos concluir que o material predominate pertence à espécie: ***`r paste0(params$species)`***.
 
-Além disso, detectou-se grande presença de traços das espécies ...
+Além disso, detectou-se grande presença de traços de ***`r paste0(params$species2)`***
 
 ## Referências
 
