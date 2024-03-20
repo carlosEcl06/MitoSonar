@@ -438,7 +438,7 @@ system(paste("echo ##### Analysis Complete #####"))
 create_report <- function(sample,top,sec){
   rmarkdown::render(input = paste0(path0,"/MitoSonar_report.Rmd"),
                     output_format = rmarkdown::pdf_document(),
-                    output_file = paste0(sample,"MSReport"),
+                    output_file = paste0(sample,"_MSReport"),
                     output_dir = paste0(path,"reports"),
                     intermediates_dir = paste0(path,"reports"),
                     clean = TRUE,

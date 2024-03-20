@@ -65,6 +65,14 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_q
 ```{r, echo=FALSE, out.width = '50%'}
 knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_filtered_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_filtered_quality.png"))))
 ```
+### *Estimativas de erros nas leituras, por base (ACGT)*
+
+```{r, echo=FALSE, out.width = '50%'}
+#knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_A.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_C.png"))))
+```
+```{r, echo=FALSE, out.width = '50%'}
+#knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_G.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_T.png"))))
+```
 
 ### *Identificação de taxonomias*
 
