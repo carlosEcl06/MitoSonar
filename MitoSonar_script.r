@@ -100,9 +100,9 @@ library(tidyverse); packageVersion("tidyverse")
 ### Loading Data and Setting Paths and Filenames
 
 path0 = system("pwd", intern = TRUE)
-path = paste0(path0,"/work-dir/")
 #FOR TESTING:
-#path = "/home/carloslima/projects/MitoSonar/work-dir/"
+#path0 = "/home/carloslima/projects/MitoSonar"
+path = paste0(path0,"/work-dir/")
 setwd(path)
 
 path1 = "data-raw/fastqs/"
@@ -246,7 +246,8 @@ system(paste("echo Drawing estimated error rates plots..."))
 
 estimErrPng <- function(dadaObj,samId,sample_dir,acgtBase) {
   png(filename = paste0(sample_dir,"/",samId,"_estimErr_",acgtBase,".png"), width = 800, height = 600)
-  plotErrors(dadaObj, acgtBase, nominalQ=TRUE)
+  plot <- plotErrors(dadaObj, acgtBase, nominalQ=TRUE)
+  print(plt)
   dev.off()
 }
 
@@ -404,7 +405,8 @@ ps.toptaxa <- prune_taxa(toptaxa, ps.toptaxa)
 for (sample_name in row.names(otu_table(ps.toptaxa))){
   ps.toptaxa_sample <- prune_samples(sample_name, ps.toptaxa)
   png(filename = paste0(path, "data/images/plots/", sample_name, "_toptaxa.png"), width = 800, height = 600)
-  plot_bar(ps.toptaxa_sample, x = "taxa", y = "Abundance", fill = "taxa", title = paste0("Most abundant taxa for sample ",sample_name))
+  plot <- plot_bar(ps.toptaxa_sample, x = "taxa", y = "Abundance", fill = "taxa", title = paste0("Most abundant taxa for sample ",sample_name))
+  print(plot)
   dev.off()
 }
 
@@ -473,3 +475,5 @@ for (sample_name in sam_names) {
   #print("-----")
   create_report(sample_name,toptaxa,sectaxas)
 }
+system(paste0("rm -r ",path,"reports/work-dir"))
+

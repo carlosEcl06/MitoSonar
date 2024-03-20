@@ -1,4 +1,8 @@
 ---
+header-includes:
+   - \usepackage[default]{sourcesanspro}
+   - \usepackage[T1]{fontenc}
+mainfont: SourceSansPro
 output:
   pdf_document: default
 params:
@@ -11,6 +15,10 @@ params:
   species: "Genus species"
   species2: "Genus species"
 ---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, dev="cairo_pdf")
+```
 
 ![](work-dir/data/images/assets/catg_header.png){width="536"}
 
@@ -28,7 +36,7 @@ Versão do Relatório: 1.0
 
 Data: `r format(Sys.time(), '%d/%m/%y')`
 
-Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `r params$sample `, que foi sequenciada e analisada em metabarcoding.
+Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `r params$sample`, que foi sequenciada e analisada em metabarcoding.
 
 Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Institute, University of Tokyo, Japan.
 
@@ -36,7 +44,7 @@ Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Instit
 
 ### *Sequenciamento*
 
-As amostras foram sequenciadas utilizando a metodologia de sequenciamento do gene 12S do DNA mitocondrial. O sequenciamento foi realizado no equipamento X com comprimentos de leituras geradas em x X y.
+As amostras foram sequenciadas utilizando a metodologia de sequenciamento do gene 12S do DNA mitocondrial.
 
 ### *Análise Bioinformática*
 
@@ -65,13 +73,15 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_q
 ```{r, echo=FALSE, out.width = '50%'}
 knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_filtered_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_filtered_quality.png"))))
 ```
-### *Estimativas de erros nas leituras, por base (ACGT)*
+
+### *Estimativa de erros nas leituras por base*
 
 ```{r, echo=FALSE, out.width = '50%'}
-#knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_A.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_C.png"))))
+knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_A.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_C.png"))))
 ```
+
 ```{r, echo=FALSE, out.width = '50%'}
-#knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_G.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors", params$sample,"_estimErr_T.png"))))
+knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_G.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_T.png"))))
 ```
 
 ### *Identificação de taxonomias*
@@ -79,7 +89,7 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_q
 Para identificação do organismo presente na amostra após o tratamento dos dados, foi utilizada a estratégia de comparação com o banco de dados MiFish.
 
 ```{r, echo=FALSE, out.width = '75%'}
-#knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_toptaxa.png"))
+knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_toptaxa.png"))
 ```
 
 ## Conclusão
