@@ -99,7 +99,10 @@ library(tidyverse); packageVersion("tidyverse")
 
 ### Loading Data and Setting Paths and Filenames
 
-path = "/home/carloslima/projects/MitoSonar/work-dir/"
+path0 = system("pwd", intern = TRUE)
+path = paste0(path0,"/work-dir/")
+#FOR TESTING:
+#path = "/home/carloslima/projects/MitoSonar/work-dir/"
 setwd(path)
 
 path1 = "data-raw/fastqs/"
@@ -432,8 +435,8 @@ system(paste("echo ##### Analysis Complete #####"))
 
 ### Calling Rmd for generating reports
 
-create_report <- function(sample){
-  rmarkdown::render(input = "MitoSonar_report.Rmd",
+create_report <- function(sample,top,sec){
+  rmarkdown::render(input = paste0(path0,"/MitoSonar_report.Rmd"),
                     output_format = rmarkdown::pdf_document(),
                     output_file = paste0(sample,"MSReport"),
                     output_dir = paste0(path,"reports"),
@@ -444,11 +447,29 @@ create_report <- function(sample){
                                   truncQ = truncQ,
                                   truncLen = truncLen,
                                   trimLeft = trimLeft,
-                                  maxEE = maxEE))
+                                  maxEE = maxEE,
+                                  species = top,
+                                  species2 = sec))
 }
 
-for (sampleid in sam_names) {
-  rep_dir <- paste0(path,"reports")
-  if(!dir.exists(rep_dir)){dir.create(rep_dir)}
-  create_report(sampleid)
+rep_dir <- paste0(path,"reports")
+if(!dir.exists(rep_dir)){dir.create(rep_dir)}
+
+for (sample_name in sam_names) {
+  ps.toptaxa_sample <- prune_samples(sample_name, ps.toptaxa)
+  otu_data <- as.data.frame(otu_table(ps.toptaxa_sample))
+  topseq <- names(otu_data)[which.max(otu_data)]
+  toptaxa <- tax_table(ps.toptaxa_sample)[topseq]
+  sectaxas <- c()
+  for (seq in (setdiff(names(otu_data), topseq))) {
+    if (otu_data[seq] >= 0.1) {
+      secseq <- seq
+      sectaxas <- append(sectaxas,tax_table(ps.toptaxa_sample)[secseq])
+    }
+  }
+  #print(sample_name)
+  #print(paste0("Top taxa: ",toptaxa))
+  #print(paste0("Other relevant taxas: ",paste(sectaxas, collapse = ", ")))
+  #print("-----")
+  create_report(sample_name,toptaxa,sectaxas)
 }

@@ -28,7 +28,9 @@ Versão do Relatório: 1.0
 
 Data: `r format(Sys.time(), '%d/%m/%y')`
 
-Amostras: No total X amostras pair-end de eDNA foram sequenciadas e analisadas em metabarcoding. Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Institute, University of Tokyo, Japan.
+Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `r params$sample `, que foi sequenciada e analisada em metabarcoding.
+
+Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Institute, University of Tokyo, Japan.
 
 ## Workflow da análise
 
@@ -48,7 +50,7 @@ As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo
 -   Leituras com taxa de erros estimados superior a `r params$maxEE` foram removidas;
 -   Leituras contendo porções com taxa de erro superior a `r params$truncQ` truncadas na primeira ocorrência desta;
 -   Leituras menores que `r params$truncLen` pares de bases foram removidas, e as maiores, truncadas;
--   As primeiras `r params$truncLeft` bases foram removidas das leituras.
+-   As primeiras `r params$trimLeft` bases foram removidas das leituras.
 
 ### *Perfis de qualidade dos dados antes e depois da limpeza das leituras*
 
