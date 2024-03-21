@@ -246,7 +246,7 @@ system(paste("echo Drawing estimated error rates plots..."))
 estimErrPng <- function(dadaObj,samId,sample_dir,acgtBase) {
   png(filename = paste0(sample_dir,"/",samId,"_estimErr_",acgtBase,".png"), width = 800, height = 600)
   plot <- plotErrors(dadaObj, acgtBase, nominalQ=TRUE)
-  print(plt)
+  print(plot)
   dev.off()
 }
 
