@@ -11,11 +11,11 @@ trimLeft = arguments[4]
 maxEE = arguments[5]
 
 ## Defaults for testing
-maxN=0
-truncQ=2
-truncLen=100
-trimLeft=18
-maxEE=2
+#maxN=0
+#truncQ=2
+#truncLen=100
+#trimLeft=18
+#maxEE=2
 
 
 #Every few months you should uninstall and reinstall the packages you will be using to ensure they are most recent versions.
@@ -75,27 +75,27 @@ maxEE=2
 
 system(paste("echo Loading R Packages..."))
 
-library(BiocManager); packageVersion("BiocManager") 
+library(BiocManager); #packageVersion("BiocManager") 
 
-library(dada2); packageVersion("dada2")
+library(dada2); #packageVersion("dada2")
 
-library(ShortRead); packageVersion("ShortRead") 
+library(ShortRead); #packageVersion("ShortRead") 
 
-library(ggplot2); packageVersion("ggplot2") 
+library(ggplot2); #packageVersion("ggplot2") 
 
-library(phyloseq); packageVersion("phyloseq") 
+library(phyloseq); #packageVersion("phyloseq") 
 
-library(Biostrings); packageVersion("Biostrings") 
+library(Biostrings); #packageVersion("Biostrings") 
 
-library(dplyr); packageVersion("dplyr") 
+library(dplyr); #packageVersion("dplyr") 
 
 library(easycsv)
 
 library(devtools)
 
-library(rBLAST); packageVersion("rBLAST")
+library(rBLAST); #packageVersion("rBLAST")
 
-library(tidyverse); packageVersion("tidyverse")
+library(tidyverse); #packageVersion("tidyverse")
 
 ### Loading Data and Setting Paths and Filenames
 
@@ -116,7 +116,6 @@ tax_sequences <- "data/taxsequences.fna"
 tax_sequences2 <- "data/taxsequences.fna.unfiltered"
 
 vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
-
 
 fns <- list.files(paste(path, path1, sep = ""))
 
