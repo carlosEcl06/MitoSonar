@@ -21,3 +21,8 @@ RUN ~/miniconda3/bin/conda install -y r-base
 # Installing R packages
 RUN R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')"
 RUN R -e "BiocManager::install('DESeq2')"
+RUN R -e "BiocManager::install('ShortRead', force = TRUE)"
+RUN R -e "BiocManager::install('dada2', force = TRUE)"
+RUN R -e "BiocManager::install('ggplot2', force = TRUE)"
+RUN R -e "BiocManager::install('phyloseq', force = TRUE)"
+RUN R -e "BiocManager::install('Biostrings', force = TRUE)"
