@@ -18,5 +18,6 @@ RUN ~/miniconda3/bin/conda config --add channels conda-forge
 RUN ~/miniconda3/bin/activate
 RUN ~/miniconda3/bin/conda install -y r-base
 
+# Installing R packages
 RUN R -e "install.packages('BiocManager', repos = 'https://cloud.r-project.org')"
 RUN R -e "BiocManager::install('DESeq2')"
