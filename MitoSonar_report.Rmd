@@ -40,6 +40,8 @@ Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `
 
 Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Institute, University of Tokyo, Japan.
 
+\newpage
+
 ## Workflow da análise
 
 ### *Sequenciamento*
@@ -60,6 +62,8 @@ As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo
 -   Leituras menores que `r params$truncLen` pares de bases foram removidas, e as maiores, truncadas;
 -   As primeiras `r params$trimLeft` bases foram removidas das leituras.
 
+\newpage
+
 ### *Perfis de qualidade dos dados antes e depois da limpeza das leituras*
 
 *Antes da filtragem*
@@ -74,6 +78,8 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_q
 knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_filtered_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_filtered_quality.png"))))
 ```
 
+\newpage
+
 ### *Estimativa de erros nas leituras por base*
 
 ```{r, echo=FALSE, out.width = '50%'}
@@ -83,6 +89,8 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_e
 ```{r, echo=FALSE, out.width = '50%'}
 knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_G.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_T.png"))))
 ```
+
+\newpage
 
 ### *Identificação de taxonomias*
 
@@ -97,6 +105,8 @@ knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_top
 Ao final da comparação podemos concluir que o material predominate pertence à espécie: ***`r paste0(params$species)`***.
 
 Além disso, detectou-se grande presença de traços de ***`r paste0(params$species2)`***
+
+\newpage
 
 ## Referências
 
