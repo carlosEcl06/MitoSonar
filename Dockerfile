@@ -29,11 +29,11 @@ RUN R -e "BiocManager::install('Biostrings', force = TRUE)"
 RUN R -e "install.packages('dplyr', repos = 'https://cloud.r-project.org')"
 RUN R -e "BiocManager::install('easycsv', force = TRUE)"
 RUN R -e "BiocManager::install('tidyverse', force = TRUE)"
-#RUN apt-get update && apt-get install -y \
-#    git \
-#    libcurl4-openssl-dev \
-#    libssl-dev \
-#    libxml2-dev \
-#    make
+RUN apt-get update && apt-get install -y \
+    git \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    make
 RUN ~/miniconda3/bin/conda install -y conda-forge::r-devtools
 RUN R -e "devtools::install_github('mhahsler/rBLAST', force = TRUE)"
