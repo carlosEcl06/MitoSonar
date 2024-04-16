@@ -125,12 +125,6 @@ print(paste0("Além disso, detectou-se uma presença significativa (>10% da amos
 
 ## Referências
 
--   CLAVER, C. et al. An automated workflow to assess completeness and curate GenBank for environmental DNA metabarcoding: The marine fish assemblage as case study. Environmental DNA, v. 5, n. 4, p. 634–647, jul. 2023.
-
--   KELLY, R. P.; SHELTON, A. O.; GALLEGO, R. Understanding PCR Processes to Draw Meaningful Conclusions from Environmental DNA Studies. Scientific Reports, v. 9, n. 1, p. 12133, 20 ago. 2019.
-
--   MIYA, M. et al. MiFish, a set of universal PCR primers for metabarcoding environmental DNA from fishes: detection of more than 230 subtropical marine species. Royal Society Open Science, v. 2, n. 7, p. 150088, jul. 2015.
-
 -   RIAZ, T. et al. ecoPrimers: inference of new DNA barcode markers from whole genome sequence analysis. Nucleic Acids Research, v. 39, n. 21, p. e145–e145, 1 nov. 2011.
 
 -   STOECKLE, M. Y. et al. Trawl and eDNA assessment of marine fish diversity, seasonality, and relative abundance in coastal New Jersey, USA. ICES Journal of Marine Science, v. 78, n. 1, p. 293–304, 24 mar. 2021.
