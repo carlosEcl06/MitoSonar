@@ -32,13 +32,11 @@ Nome: MitoSonar - Metabarcoding 12s de Peixes.
 
 Descrição geral: Identificação taxonômica de peixes através de comparação de amostras da região 12s do DNA mitocondrial contra um banco de dados de espécies conhecidas.
 
-Versão do Relatório: 1.0
+Versão do Relatório: alfa 0.1.2
 
 Data: `r format(Sys.time(), '%d/%m/%y')`
 
-Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `r params$sample`, que foi sequenciada e analisada em metabarcoding.
-
-Banco de dados de mitogenomas: MitoFish, da Atmosphere and Ocean Research Institute, University of Tokyo, Japan.
+Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `r params$sample`, que foi sequenciada e analisada em metabarcoding por cruzamento com um banco de dados de mitogenomas conhecidos.
 
 \newpage
 
@@ -50,11 +48,11 @@ As amostras foram sequenciadas utilizando a metodologia de sequenciamento do gen
 
 ### *Análise Bioinformática*
 
-Após o final do sequenciamento, foram executadas as análises bioinformáticas. Inicialmente as leituras geradas (no formato fastq) passaram por uma avaliação da qualidade das sequências utilizando o pacote R ShortRead. Em seguida, as sequências foram filtradas pela função fastqPairedFilter da ferramenta dada2, que também foi utilizada para a inferência das sequences. Após uma etapa de remoção de quimeras, foram construídas as tabelas de sequences e OTUs, e estas foram comparadas ao banco de dados de referência pelo software BLAST+, do NCBI.
+Após o final do sequenciamento, foram executadas as análises bioinformáticas. Inicialmente as leituras geradas (no formato fastq) passaram por uma avaliação da qualidade. Em seguida, as sequências foram filtradas, seguindo para uma etapa de inferência das sequences. Após a remoção de quimeras, foram construídas as tabelas de sequences e OTUs, e estas foram comparadas ao banco de dados de referência.
 
 ### *Limpeza dos dados*
 
-As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo retirada as sequências de baixa qualidade e adaptadores utilizando funções dos pacotes ShortRead e dada2 do R, nas versões 1.60.0 e 1.30.0, respectivamente. Os seguintes parâmetros foram utilizados:
+As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo retirada as sequências de baixa qualidade e adaptadores. Os seguintes parâmetros foram utilizados:
 
 -   Leituras com mais de `r params$maxN` Ns foram removidas;
 -   Leituras com taxa de erros estimados superior a `r params$maxEE` foram removidas;
@@ -65,6 +63,12 @@ As leituras geradas no sequenciamento passaram por um processo de limpeza, sendo
 \newpage
 
 ### *Perfis de qualidade dos dados antes e depois da limpeza das leituras*
+
+#### Sobre os gráficos:
+
+O que mostra: A distribuição das pontuações de qualidade de Phred para cada posição ao longo de todas as leituras.
+
+Como interpretar: Idealmente, a maioria das pontuações deve estar acima de Q20 (qualidade de erro de 1 em 100).
 
 *Antes da filtragem*
 
@@ -81,6 +85,14 @@ knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_q
 \newpage
 
 ### *Estimativa de erros nas leituras por base*
+
+#### Sobre os gráficos
+
+O que mostra: Eixo X: Representa as posições das bases na leitura de sequenciamento. Eixo Y: Mostra a taxa de erro logarítmica estimada para a base específica em cada posição.
+
+Como interpretar: Normalmente, espera-se que as taxas de erro aumentem perto do final das leituras, devido à degradação da qualidade do sinal no sequenciamento. Um aumento nas taxas de erro em posições mais iniciais pode indicar problemas na qualidade do sequenciamento ou na preparação da amostra.
+
+Nos gráficos, a "linha ideal" representa a relação entre o valor de qualidade reportado pelas leituras de sequenciamento e a taxa de erro esperada com base nessa qualidade de base. O propósito dessa linha é fornecer uma referência para comparar as taxas de erro observadas com o que seria teoricamente esperado. Sendo assim, quanto mais semelhante à "linha ideal" o traçado do gráfico for, melhor.
 
 ```{r, echo=FALSE, out.width = '50%'}
 knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_A.png"),(paste0("work-dir/data/images/plots/",params$sample,"_estimated_errors/", params$sample,"_estimErr_C.png"))))
@@ -104,17 +116,14 @@ knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_top
 
 Ao final da comparação podemos concluir que o material predominate pertence à espécie: ***`r paste0(params$species)`***.
 
-Além disso, detectou-se grande presença de traços de ***`r paste0(params$species2)`***
+```{r, echo=FALSE}
+if (length(params$species2)>=1)
+print(paste0("Além disso, detectou-se uma presença significativa (>10% da amostra) de traços de ", params$species2))
+```
 
 \newpage
 
 ## Referências
-
--   CLAVER, C. et al. An automated workflow to assess completeness and curate GenBank for environmental DNA metabarcoding: The marine fish assemblage as case study. Environmental DNA, v. 5, n. 4, p. 634–647, jul. 2023.
-
--   KELLY, R. P.; SHELTON, A. O.; GALLEGO, R. Understanding PCR Processes to Draw Meaningful Conclusions from Environmental DNA Studies. Scientific Reports, v. 9, n. 1, p. 12133, 20 ago. 2019.
-
--   MIYA, M. et al. MiFish, a set of universal PCR primers for metabarcoding environmental DNA from fishes: detection of more than 230 subtropical marine species. Royal Society Open Science, v. 2, n. 7, p. 150088, jul. 2015.
 
 -   RIAZ, T. et al. ecoPrimers: inference of new DNA barcode markers from whole genome sequence analysis. Nucleic Acids Research, v. 39, n. 21, p. e145–e145, 1 nov. 2011.
 
