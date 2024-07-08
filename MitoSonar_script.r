@@ -9,6 +9,7 @@ truncQ = arguments[2]
 truncLen = arguments[3]
 trimLeft = arguments[4]
 maxEE = arguments[5]
+database = arguments[6]
 
 ## Defaults for testing
 #maxN=0
@@ -115,7 +116,20 @@ tax_sequences <- "data/taxsequences.fna"
 
 tax_sequences2 <- "data/taxsequences.fna.unfiltered"
 
-vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
+# Original. Single database:
+#vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
+
+# Multi databases:
+vert_fasta <- ""
+if (database == "MiFish") {
+  vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
+} else if (database == "Silva") {
+  vert_fasta <- "data-raw/Silva.fasta"#rascunho
+} else if (database == "UNITE") {
+  vert_fasta <- "data-raw/UNITE.fasta"#rascunho
+} else {
+  stop("Valor inválido para a variável database.")
+}
 
 fns <- list.files(paste(path, path1, sep = ""))
 

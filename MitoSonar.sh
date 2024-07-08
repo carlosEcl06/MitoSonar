@@ -2,7 +2,7 @@
 
 helpFunction()
 {
-   echo -e "***MitoSonar: Metabarcoding de Peixes***"
+   echo -e "***MitoSonar: Multipurpose Metabarcoding Tool***"
    echo -e ""
    echo -e "\tUso: $0 [options]"
    echo -e ""
@@ -81,5 +81,36 @@ echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
 
+## Interface de seleção de banco de dados
+while true; do
+  echo "Please, select the kind of tax-search you wish to perform:"
+  echo "   1) Fish mitogenomes (12s-like)"
+  echo "   2) Bacteria ribossomal RNA (16s-like)"
+  echo "   3) Fungi ribossomal RNA (ITS-like)"
+  read -p "Enter your choice: " choice
+
+  case $choice in
+    1)
+      echo "You selected Fish mitogenomes (12s-like)"
+      database='MiFish'
+      break
+      ;;
+    2)
+      echo "You selected Bacteria ribossomal RNA (16s-like)"
+      database='Silva'
+      break
+      ;;
+    3)
+      echo "You selected Fungi ribossomal RNA (ITS-like)"
+      database='UNITE'
+      break
+      ;;
+    *)
+      printf "\nWARNING: Invalid selection. Please enter the number of your choice.\n\n"
+      ;;
+  esac
+done
+
+
 ## Chamada do script R:
-Rscript MitoSonar_script.r "$maxN" "$truncQ" "$truncLen" "$trimLeft" "$maxEE"
+Rscript MitoSonar_script.r "$maxN" "$truncQ" "$truncLen" "$trimLeft" "$maxEE" "$database"
