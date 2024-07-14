@@ -13,11 +13,13 @@ database = arguments[6]
 inputtype = arguments[7]
 
 ## Defaults for testing
-#maxN=0
-#truncQ=2
-#truncLen=100
-#trimLeft=18
-#maxEE=2
+# maxN=0
+# truncQ=2
+# truncLen=100
+# trimLeft=18
+# maxEE=2
+# database='MiFish'
+# inputtype='single'
 
 
 #Every few months you should uninstall and reinstall the packages you will be using to ensure they are most recent versions.
@@ -262,9 +264,6 @@ if (inputtype == "pair") {
 
 system(paste("echo Quality reports have been sent to 'work-dir/data/images/plots'"))
 
-############################################################################
-#                             CONTINUAR DAQUI!                             #
-############################################################################
 
 ### Dereplication 
 
@@ -272,8 +271,12 @@ system(paste("echo Quality reports have been sent to 'work-dir/data/images/plots
 
 system(paste("echo Derreplicating FASTQs..."))
 
-derepFs <- lapply(filtFs, derepFastq, verbose=TRUE) 
-derepRs <- lapply(filtRs, derepFastq, verbose=TRUE)
+if (inputtype=='pair') {
+  derepFs <- lapply(filtFs, derepFastq, verbose=TRUE) 
+  derepRs <- lapply(filtRs, derepFastq, verbose=TRUE)
+} else {
+  dereps <- lapply(filts, derepFastq, verbose=TRUE) ############### LAST EDITED
+}
 
 ### Name the derep-class objects by the sample names
 
