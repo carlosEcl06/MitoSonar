@@ -111,6 +111,30 @@ while true; do
   esac
 done
 
+## Definindo se amostra é de fita simples ou dupla
+while true; do
+  echo "Please, inform if your input data is single or pair-ended"
+  echo "   1) Single strand"
+  echo "   2) Pair-ended"
+  read -p "Enter your choice: " choice
+
+  case $choice in
+    1)
+      echo "Initiating tool for simple input..."
+      inputtype='single'
+      break
+      ;;
+    2)
+      echo "Initiating tool for pair-ended input..."
+      inputtype='pair'
+      break
+      ;;
+    *)
+      printf "\nWARNING: Invalid selection. Please enter the number of your choice.\n\n"
+      ;;
+  esac
+done
+
 
 ## Chamada do script R:
-Rscript MitoSonar_script.r "$maxN" "$truncQ" "$truncLen" "$trimLeft" "$maxEE" "$database"
+Rscript MitoSonar_script.r "$maxN" "$truncQ" "$truncLen" "$trimLeft" "$maxEE" "$database" "$inputtype"

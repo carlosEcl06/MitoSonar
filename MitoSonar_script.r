@@ -10,6 +10,7 @@ truncLen = arguments[3]
 trimLeft = arguments[4]
 maxEE = arguments[5]
 database = arguments[6]
+inputtype = arguments[7]
 
 ## Defaults for testing
 #maxN=0
@@ -128,7 +129,7 @@ if (database == "MiFish") {
 } else if (database == "UNITE") {
   vert_fasta <- "data-raw/UNITE.fasta"#rascunho
 } else {
-  stop("Valor inválido para a variável database.")
+  stop("Valor inválido para a variável database.") # Não é pra acontecer nunca, a não ser que haja algum problema na chamada deste script pelo MitoSonar.sh
 }
 
 fns <- list.files(paste(path, path1, sep = ""))
@@ -137,91 +138,133 @@ fastqs <- fns[grepl(".fastq$", fns)]
 
 fastqs <- sort(fastqs) # Sorting fastqs so that Forward (R1) and Reverse (R2) reads correspond to each other.
 
-fnFs <- fastqs[grepl("_R1", fastqs)]
+if (inputtype == "pair"){
+  fnFs <- fastqs[grepl("_R1", fastqs)]
+  fnRs <- fastqs[grepl("_R2", fastqs)]
+}
 
-fnRs <- fastqs[grepl("_R2", fastqs)]
+if(!dir.exists("data/images/plots")){dir.create("data/images/plots")}
 
+if (inputtype == "pair"){
+  ### Visualize the quality profile of the forward reads: 
 
+  system(paste("echo Examining quality profiles of forward reads..."))
 
-### Visualize the quality profile of the forward reads: 
+  for(fnF in fnFs) {
+    fastq_name <- sub("_R1_001.fastq$", "", fnF)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_forward_quality.png"), width = 800, height = 600)
+    print(fnF)
+    qqF <- qa(paste0(path, path1, fnF))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile"))
+    dev.off()
+  } 
 
-system(paste("echo Examining quality profiles of forward reads..."))
+  ### Visualize the quality profile of the reverse reads: 
 
-for(fnF in fnFs) {
-  fastq_name <- sub("_R1_001.fastq$", "", fnF)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_forward_quality.png"), width = 800, height = 600)
-  print(fnF)
-  qqF <- qa(paste0(path, path1, fnF))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile"))
-  dev.off()
-} 
+  system(paste("echo Examining quality profiles of reverse reads..."))
 
-### Visualize the quality profile of the reverse reads: 
+  for(fnR in fnRs) {
+    fastq_name <- sub("_R2_001.fastq$", "", fnR)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_quality.png"), width = 800, height = 600)
+    print(fnR)
+    qqR <- qa(paste0(path, path1, fnR))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile")) 
+    dev.off()
+  } 
 
-system(paste("echo Examining quality profiles of reverse reads..."))
+} else {
+  ### Visualize the quality profile of sigle-ended reads: 
 
-for(fnR in fnRs) {
-  fastq_name <- sub("_R2_001.fastq$", "", fnR)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_quality.png"), width = 800, height = 600)
-  print(fnR)
-  qqR <- qa(paste0(path, path1, fnR))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile")) 
-  dev.off()
-} 
+  system(paste("echo Examining quality profiles of reads..."))
+
+  for(fn in fastqs) {
+    fastq_name <- sub(".fastq$", "", fn)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_quality.png"), width = 800, height = 600)
+    print(fn)
+    qq <- qa(paste0(path, path1, fn))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qq, main="Reads quality profile"))
+    dev.off()
+  }
+}
 
 system(paste("echo Quality reports saved into 'work-dir/data/images/plots'"))
 
 ### Filtering and trimming 
 
-### Filter the forward and reverse reads: 
-
 system(paste("echo Filtering and Trimming..."))
 
-filtFs <- paste0(path, sapply(strsplit(fnFs, "\\."), `[`, 1), "_filt.fastq.gz") 
+if (inputtype == "pair") {
+  filtFs <- paste0(path, sapply(strsplit(fnFs, "\\."), `[`, 1), "_filt.fastq.gz") 
+  filtRs <- paste0(path, sapply(strsplit(fnRs, "\\."), `[`, 1), "_filt.fastq.gz") 
 
-filtRs <- paste0(path, sapply(strsplit(fnRs, "\\."), `[`, 1), "_filt.fastq.gz") 
+  for(i in seq_along(fnFs)) {
+    fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=maxN, maxEE=maxEE, truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=c(truncLen,truncLen), compress=TRUE, verbose=TRUE)
+  }
+} else {
+  filts <- paste0(path, sapply(strsplit(fastqs, "\\."), `[`, 1), "_filt.fastq.gz")
 
-for(i in seq_along(fnFs)) { #Adjust parameters according to quality profiles
-  fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=maxN, maxEE=maxEE, truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=c(truncLen,truncLen), compress=TRUE, verbose=TRUE)
+  for(i in seq_along(fastqs)) {
+    fastqFilter(paste0(path, path1, fastqs[i]), filts[i], maxN=as.numeric(maxN), maxEE=as.numeric(maxEE), truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=as.numeric(truncLen), compress=TRUE, verbose=TRUE)
+  }
 }
 
-### Visualize the quality profile of the forward reads after filtering: 
+system(paste("echo Examining quality profiles of reads after filtering..."))
 
-system(paste("echo Examining quality profiles after filtering..."))
+if (inputtype == "pair") {
+  ### Visualize the quality profile of the forward reads after filtering: 
 
-for(fnF in filtFs) {
-  fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnF)
-  fastq_name <- sub("_R1_001_filt.fastq.gz$", "", fastq_name)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_forward_filtered_quality.png"), width = 800, height = 600)
-  print(fnF)
-  qqF <- qa(paste0(fnF))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile after filtering"))
-  dev.off()
-} 
+  for(fnF in filtFs) {
+    fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnF)
+    fastq_name <- sub("_R1_001_filt.fastq.gz$", "", fastq_name)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_forward_filtered_quality.png"), width = 800, height = 600)
+    print(fnF)
+    qqF <- qa(paste0(fnF))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile after filtering"))
+    dev.off()
+  } 
 
-### Visualize the quality profile of the reverse reads after filtering: 
+  ### Visualize the quality profile of the reverse reads after filtering: 
 
-for(fnR in filtRs) {
-  fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnR)
-  fastq_name <- sub("_R2_001_filt.fastq.gz$", "", fastq_name)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_filtered_quality.png"), width = 800, height = 600)
-  print(fnR)
-  qqR <- qa(paste0(fnR))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile after filtering"))
-  dev.off()
-} 
+  for(fnR in filtRs) {
+    fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnR)
+    fastq_name <- sub("_R2_001_filt.fastq.gz$", "", fastq_name)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_filtered_quality.png"), width = 800, height = 600)
+    print(fnR)
+    qqR <- qa(paste0(fnR))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile after filtering"))
+    dev.off()
+  } 
+} else {
+  ### Visualize the quality profile of the single-ended reads filtering: 
+
+  for(fn in filts) {
+    fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fn)
+    fastq_name <- sub("_filt.fastq.gz$", "", fastq_name)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_filtered_quality.png"), width = 800, height = 600)
+    print(fn)
+    qq <- qa(paste0(fn))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qq, main="Reads quality profile after filtering"))
+    dev.off()
+  } 
+}
 
 system(paste("echo Quality reports have been sent to 'work-dir/data/images/plots'"))
 
-
+############################################################################
+#                             CONTINUAR DAQUI!                             #
+############################################################################
 
 ### Dereplication 
 
