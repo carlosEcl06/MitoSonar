@@ -247,7 +247,7 @@ if (inputtype == "pair") {
     dev.off()
   } 
 } else {
-  ### Visualize the quality profile of the single-ended reads filtering: 
+  ### Visualize the quality profile of the single-ended reads after filtering: 
 
   for(fn in filts) {
     fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fn)
@@ -274,17 +274,22 @@ system(paste("echo Derreplicating FASTQs..."))
 if (inputtype=='pair') {
   derepFs <- lapply(filtFs, derepFastq, verbose=TRUE) 
   derepRs <- lapply(filtRs, derepFastq, verbose=TRUE)
+  
+  sam_names <- sapply(strsplit(fnFs, "/"), tail, n=1)
+  sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
+  
+  names(derepFs) <- sam_names
+  names(derepRs) <- sam_names
 } else {
-  dereps <- lapply(filts, derepFastq, verbose=TRUE) ############### LAST EDITED
+  dereps <- lapply(filts, derepFastq, verbose=TRUE)
+  
+  sam_names <- sapply(strsplit(fns, "/"), tail, n=1)
+  sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
+  
+  names(dereps) <- sam_names
 }
 
-### Name the derep-class objects by the sample names
 
-sam_names <- sapply(strsplit(fnFs, "/"), tail, n=1)
-sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
-
-names(derepFs) <- sam_names
-names(derepRs) <- sam_names
 
 ### Sample Inference by DADA2
 
@@ -294,8 +299,12 @@ dadainfer <- function(derepFastqs){
   dada(derepFastqs, err=inflateErr(tperr1,3), errorEstimationFunction=loessErrfun, selfConsist = TRUE)
 }
 
-dadaFs <- dadainfer(derepFs)
-dadaRs <- dadainfer(derepRs)
+if (inputtype=='pair') {
+  dadaFs <- dadainfer(derepFs)
+  dadaRs <- dadainfer(derepRs)
+} else {
+  dadaFs <- dadainfer(dereps)
+}
 
 
 
@@ -309,6 +318,7 @@ estimErrPng <- function(dadaObj,samId,sample_dir,acgtBase) {
   print(plot)
   dev.off()
 }
+
 
 if (length(dadaFs) > 1) {
   i=1
@@ -338,17 +348,17 @@ system(paste("echo Plots saved into 'work-dir/data/images/plots'"))
 
 system(paste("echo Removing chimeric sequences..."))
 
-bimFs <- sapply(dadaFs, isBimeraDenovo, verbose=TRUE)
-bimRs <- sapply(dadaRs, isBimeraDenovo, verbose=TRUE)
-
-print(unname(sapply(bimFs, mean)), digits=2)
-print(unname(sapply(bimRs, mean)), digits=2)
-
-
-
-### Merge paired reads
-
-mergers <- mapply(mergePairs, dadaFs, derepFs, dadaRs, derepRs, SIMPLIFY=FALSE)
+if (inputtype=="pair") {
+  bimFs <- sapply(dadaFs, isBimeraDenovo, verbose=TRUE)
+  bimRs <- sapply(dadaRs, isBimeraDenovo, verbose=TRUE)
+  print(unname(sapply(bimFs, mean)), digits=2)
+  print(unname(sapply(bimRs, mean)), digits=2)
+  ### Merge paired reads
+  mergers <- mapply(mergePairs, dadaFs, derepFs, dadaRs, derepRs, SIMPLIFY=FALSE)
+} else {
+  mergers <- sapply(dadaFs, isBimeraDenovo, verbose=TRUE)
+  print(unname(sapply(mergers, mean)), digits=2)
+}
 
 
 
