@@ -14,6 +14,8 @@ params:
   maxEE: "maxEE"
   species: "Genus species"
   species2: "Genus species"
+  database: "MiFish"
+  inputtype: "pair"
 ---
 
 ```{r, echo=FALSE}
@@ -28,15 +30,15 @@ knitr::opts_chunk$set(echo = FALSE, dev="cairo_pdf")
 
 ## Resumo do Serviço
 
-Nome: MitoSonar - Metabarcoding 12s de Peixes.
+Nome: MitoSonar - Metabarcoding `r if(params$database=='MiFish'){'12s Písceo'}else if(params$database=='Silva'){'16s Bacteriano'}else if(params$database=='UNITE'){'ITS Fúngico'}`.
 
-Descrição geral: Identificação taxonômica de peixes através de comparação de amostras da região 12s do DNA mitocondrial contra um banco de dados de espécies conhecidas.
+Descrição geral: Identificação taxonômica de `r if(params$database=='MiFish'){'peixes'}else if(params$database=='Silva'){'bactérias'}else if(params$database=='UNITE'){'fungos'}` através de comparação de amostras da região `r if(params$database=='MiFish'){'12s do DNA mitocondrial'}else if(params$database=='Silva'){'16s do rRNA'}else if(params$database=='UNITE'){'ITS do rRNA'}` contra um banco de dados de espécies conhecidas.
 
-Versão do Relatório: alfa 0.1.2
+Versão do Relatório: b.0.0
 
 Data: `r format(Sys.time(), '%d/%m/%y')`
 
-Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `r params$sample`, que foi sequenciada e analisada em metabarcoding por cruzamento com um banco de dados de mitogenomas conhecidos.
+Amostra: Este laudo é referente à amostra `r if(params$inputtype=='pair'){'pair'}else{'single'}`-end com identificador `r params$sample`, que foi sequenciada e analisada em metabarcoding por cruzamento com um banco de dados de sequências conhecidas.
 
 \newpage
 
@@ -44,7 +46,7 @@ Amostra: Este laudo é referente à amostra pair-end de eDNA com identificador `
 
 ### *Sequenciamento*
 
-As amostras foram sequenciadas utilizando a metodologia de sequenciamento do gene 12S do DNA mitocondrial.
+As amostras foram sequenciadas utilizando a metodologia de A IMPLEMENTAR PREENCHIMENTO PELO USUÁRIO NA CHAMADA DO SCRIPT.
 
 ### *Análise Bioinformática*
 
@@ -73,13 +75,21 @@ Como interpretar: Idealmente, a maioria das pontuações deve estar acima de Q20
 *Antes da filtragem*
 
 ```{r, echo=FALSE, out.width = '50%'}
-knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_quality.png"))))
+if (params$inputtype == "pair") {
+  knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_quality.png"))))
+} else {
+  knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_quality.png"))
+}
 ```
 
 *Depois da filtragem*
 
 ```{r, echo=FALSE, out.width = '50%'}
-knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_filtered_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_filtered_quality.png"))))
+if (params$inputtype == "pair") {
+  knitr::include_graphics(c(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_forward_filtered_quality.png"),(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_reverse_filtered_quality.png"))))
+} else {
+  knitr::include_graphics(paste0("work-dir/data/images/plots/",params$sample,"_quality_report/", params$sample,"_filtered_quality.png"))
+}
 ```
 
 \newpage

@@ -9,6 +9,8 @@ truncQ = arguments[2]
 truncLen = arguments[3]
 trimLeft = arguments[4]
 maxEE = arguments[5]
+database = arguments[6]
+inputtype = arguments[7]
 
 ## Defaults for testing
 #maxN=0
@@ -16,6 +18,8 @@ maxEE = arguments[5]
 #truncLen=100
 #trimLeft=18
 #maxEE=2
+#database='MiFish'
+#inputtype='single'
 
 
 #Every few months you should uninstall and reinstall the packages you will be using to ensure they are most recent versions.
@@ -115,98 +119,162 @@ tax_sequences <- "data/taxsequences.fna"
 
 tax_sequences2 <- "data/taxsequences.fna.unfiltered"
 
-vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
+# Original. Single database:
+#vert_fasta <- "data-raw/MiFish_all_mitogenomes.fasta"
+
+# Multi databases:
+vert_fasta <- ""
+if (database == "MiFish") {
+  vert_fasta <- "data-raw/complete_partial_mitogenomes.fasta"
+} else if (database == "Silva") {
+  vert_fasta <- "data-raw/Silva.fasta"#rascunho
+} else if (database == "UNITE") {
+  vert_fasta <- "data-raw/UNITE.fasta"#rascunho
+} else {
+  stop("Valor inválido para a variável database.") # Não é pra acontecer nunca, a não ser que haja algum problema na chamada deste script pelo MitoSonar.sh
+}
 
 fns <- list.files(paste(path, path1, sep = ""))
+
+# Checking for zipped (.fastq.gz) files
+gz_files <- fns[grep("\\.gz$", fns)]
+
+if (length(gz_files)>=1) {
+  # Unpacking .gz files
+  for (fastqgz in gz_files) {
+    system(paste("gunzip ", path, path1, fastqgz, sep = ""))
+  }
+  fns <- list.files(paste(path, path1, sep = ""))
+}
+
 
 fastqs <- fns[grepl(".fastq$", fns)]
 
 fastqs <- sort(fastqs) # Sorting fastqs so that Forward (R1) and Reverse (R2) reads correspond to each other.
 
-fnFs <- fastqs[grepl("_R1", fastqs)]
+if (inputtype == "pair"){
+  fnFs <- fastqs[grepl("_R1", fastqs)]
+  fnRs <- fastqs[grepl("_R2", fastqs)]
+}
 
-fnRs <- fastqs[grepl("_R2", fastqs)]
+if(!dir.exists("data/images/plots")){dir.create("data/images/plots")}
 
+if (inputtype == "pair"){
+  ### Visualize the quality profile of the forward reads: 
 
+  system(paste("echo Examining quality profiles of forward reads..."))
 
-### Visualize the quality profile of the forward reads: 
+  for(fnF in fnFs) {
+    fastq_name <- sub("_R1_001.fastq$", "", fnF)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_forward_quality.png"), width = 800, height = 600)
+    print(fnF)
+    qqF <- qa(paste0(path, path1, fnF))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile"))
+    dev.off()
+  } 
 
-system(paste("echo Examining quality profiles of forward reads..."))
+  ### Visualize the quality profile of the reverse reads: 
 
-for(fnF in fnFs) {
-  fastq_name <- sub("_R1_001.fastq$", "", fnF)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_forward_quality.png"), width = 800, height = 600)
-  print(fnF)
-  qqF <- qa(paste0(path, path1, fnF))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile"))
-  dev.off()
-} 
+  system(paste("echo Examining quality profiles of reverse reads..."))
 
-### Visualize the quality profile of the reverse reads: 
+  for(fnR in fnRs) {
+    fastq_name <- sub("_R2_001.fastq$", "", fnR)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_quality.png"), width = 800, height = 600)
+    print(fnR)
+    qqR <- qa(paste0(path, path1, fnR))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile")) 
+    dev.off()
+  } 
 
-system(paste("echo Examining quality profiles of reverse reads..."))
+} else {
+  ### Visualize the quality profile of sigle-ended reads: 
 
-for(fnR in fnRs) {
-  fastq_name <- sub("_R2_001.fastq$", "", fnR)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_quality.png"), width = 800, height = 600)
-  print(fnR)
-  qqR <- qa(paste0(path, path1, fnR))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile")) 
-  dev.off()
-} 
+  system(paste("echo Examining quality profiles of reads..."))
+
+  for(fn in fastqs) {
+    fastq_name <- sub(".fastq$", "", fn)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_quality.png"), width = 800, height = 600)
+    print(fn)
+    qq <- qa(paste0(path, path1, fn))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qq, main="Reads quality profile"))
+    dev.off()
+  }
+}
 
 system(paste("echo Quality reports saved into 'work-dir/data/images/plots'"))
 
 ### Filtering and trimming 
 
-### Filter the forward and reverse reads: 
-
 system(paste("echo Filtering and Trimming..."))
 
-filtFs <- paste0(path, sapply(strsplit(fnFs, "\\."), `[`, 1), "_filt.fastq.gz") 
+if (inputtype == "pair") {
+  filtFs <- paste0(path, sapply(strsplit(fnFs, "\\."), `[`, 1), "_filt.fastq.gz") 
+  filtRs <- paste0(path, sapply(strsplit(fnRs, "\\."), `[`, 1), "_filt.fastq.gz") 
 
-filtRs <- paste0(path, sapply(strsplit(fnRs, "\\."), `[`, 1), "_filt.fastq.gz") 
+  for(i in seq_along(fnFs)) {
+    fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=maxN, maxEE=maxEE, truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=c(truncLen,truncLen), compress=TRUE, verbose=TRUE)
+  }
+} else {
+  filts <- paste0(path, sapply(strsplit(fastqs, "\\."), `[`, 1), "_filt.fastq.gz")
 
-for(i in seq_along(fnFs)) { #Adjust parameters according to quality profiles
-  fastqPairedFilter(paste0(path, path1, c(fnFs[i], fnRs[i])), c(filtFs[i], filtRs[i]), maxN=maxN, maxEE=maxEE, truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=c(truncLen,truncLen), compress=TRUE, verbose=TRUE)
+  for(i in seq_along(fastqs)) {
+    fastqFilter(paste0(path, path1, fastqs[i]), filts[i], maxN=as.numeric(maxN), maxEE=as.numeric(maxEE), truncQ=as.numeric(truncQ), trimLeft=as.numeric(trimLeft), truncLen=as.numeric(truncLen), compress=TRUE, verbose=TRUE)
+  }
 }
 
-### Visualize the quality profile of the forward reads after filtering: 
+system(paste("echo Examining quality profiles of reads after filtering..."))
 
-system(paste("echo Examining quality profiles after filtering..."))
+if (inputtype == "pair") {
+  ### Visualize the quality profile of the forward reads after filtering: 
 
-for(fnF in filtFs) {
-  fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnF)
-  fastq_name <- sub("_R1_001_filt.fastq.gz$", "", fastq_name)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_forward_filtered_quality.png"), width = 800, height = 600)
-  print(fnF)
-  qqF <- qa(paste0(fnF))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile after filtering"))
-  dev.off()
-} 
+  for(fnF in filtFs) {
+    fastq_name <- sub(paste0(path), "", fnF)
+    fastq_name <- sub("_R1_001_filt.fastq.gz$", "", fastq_name)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_forward_filtered_quality.png"), width = 800, height = 600)
+    print(fnF)
+    qqF <- qa(paste0(fnF))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqF, main="Forward reads quality profile after filtering"))
+    dev.off()
+  } 
 
-### Visualize the quality profile of the reverse reads after filtering: 
+  ### Visualize the quality profile of the reverse reads after filtering: 
 
-for(fnR in filtRs) {
-  fastq_name <- sub(paste0("^", "/home/carloslima/projects/MitoSonar/work-dir/"), "", fnR)
-  fastq_name <- sub("_R2_001_filt.fastq.gz$", "", fastq_name)
-  sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
-  if(!dir.exists(sample_dir)){dir.create(sample_dir)}
-  png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_filtered_quality.png"), width = 800, height = 600)
-  print(fnR)
-  qqR <- qa(paste0(fnR))[["perCycle"]]$quality
-  print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile after filtering"))
-  dev.off()
-} 
+  for(fnR in filtRs) {
+    fastq_name <- sub(paste0(path), "", fnR)
+    fastq_name <- sub("_R2_001_filt.fastq.gz$", "", fastq_name)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_reverse_filtered_quality.png"), width = 800, height = 600)
+    print(fnR)
+    qqR <- qa(paste0(fnR))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qqR, main="Reverse reads quality profile after filtering"))
+    dev.off()
+  } 
+} else {
+  ### Visualize the quality profile of the single-ended reads after filtering: 
+
+  for(fn in filts) {
+    fastq_name <- sub(paste0(path), "", fn)
+    fastq_name <- sub("_filt.fastq.gz$", "", fastq_name)
+    sample_dir <- paste0(path,"data/images/plots/",fastq_name,"_quality_report")
+    if(!dir.exists(sample_dir)){dir.create(sample_dir)}
+    png(filename = paste0(sample_dir,"/",fastq_name,"_filtered_quality.png"), width = 800, height = 600)
+    print(fn)
+    qq <- qa(paste0(fn))[["perCycle"]]$quality
+    print(ShortRead:::.plotCycleQuality(qq, main="Reads quality profile after filtering"))
+    dev.off()
+  } 
+}
 
 system(paste("echo Quality reports have been sent to 'work-dir/data/images/plots'"))
-
 
 
 ### Dereplication 
@@ -215,27 +283,61 @@ system(paste("echo Quality reports have been sent to 'work-dir/data/images/plots
 
 system(paste("echo Derreplicating FASTQs..."))
 
-derepFs <- lapply(filtFs, derepFastq, verbose=TRUE) 
-derepRs <- lapply(filtRs, derepFastq, verbose=TRUE)
+if (inputtype=='pair') {
+  derepFs <- lapply(filtFs, derepFastq, verbose=TRUE) 
+  derepRs <- lapply(filtRs, derepFastq, verbose=TRUE)
+  
+  sam_names <- sapply(strsplit(fnFs, "/"), tail, n=1)
+  sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
+  
+  names(derepFs) <- sam_names
+  names(derepRs) <- sam_names
+} else {
+  dereps <- lapply(filts, derepFastq, verbose=TRUE)
+  
+  sam_names <- sapply(strsplit(fns, "/"), tail, n=1)
+  sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
+  
+  names(dereps) <- sam_names
+}
 
-### Name the derep-class objects by the sample names
+### Learning errors
 
-sam_names <- sapply(strsplit(fnFs, "/"), tail, n=1)
-sam_names <- sapply(strsplit(sam_names, "_"), `[`, 1)
+if (inputtype == 'pair') {
+  errF <- learnErrors(derepFs, 
+                      nbases = 1e+08, 
+                      multithread = TRUE, 
+                      USE_QUALS = FALSE,, 
+                      verbose = 1)
+  errR <- learnErrors(derepRs, 
+                      nbases = 1e+08, 
+                      multithread = TRUE, 
+                      USE_QUALS = FALSE,, 
+                      verbose = 1)
+} else {
+  errS <- learnErrors(dereps, 
+                      nbases = 1e+08, 
+                      multithread = TRUE, 
+                      USE_QUALS = FALSE,
+                      verbose = 1)
+}
 
-names(derepFs) <- sam_names
-names(derepRs) <- sam_names
 
 ### Sample Inference by DADA2
 
 system(paste("echo Initiating inference phase..."))
 
-dadainfer <- function(derepFastqs){
-  dada(derepFastqs, err=inflateErr(tperr1,3), errorEstimationFunction=loessErrfun, selfConsist = TRUE)
+dadainfer <- function(derepFastqs, errFunc){
+  dada(derepFastqs, err=errFunc, multithread = TRUE)
 }
 
-dadaFs <- dadainfer(derepFs)
-dadaRs <- dadainfer(derepRs)
+
+if (inputtype=='pair') {
+  dadaFs <- dadainfer(derepFs, errF)
+  dadaRs <- dadainfer(derepRs, errR)
+} else {
+  dadaFs <- dadainfer(dereps, errS)
+}
 
 
 
@@ -250,7 +352,8 @@ estimErrPng <- function(dadaObj,samId,sample_dir,acgtBase) {
   dev.off()
 }
 
-if (length(dadaFs) > 1) {
+
+if (length(sam_names) > 1) {
   i=1
   while (i <= length(sam_names)) {
     sample_dir <- paste0(path,"data/images/plots/",sam_names[i],"_estimated_errors")
@@ -261,7 +364,7 @@ if (length(dadaFs) > 1) {
     estimErrPng(dadaFs[[i]],sam_names[i],sample_dir,"T")
     i=i+1
   }
-}else {
+} else {
   sample_dir <- paste0(path,"data/images/plots/",sam_names,"_estimated_errors")
   if(!dir.exists(sample_dir)){dir.create(sample_dir)}
   estimErrPng(dadaFs,sam_names,sample_dir,"A")
@@ -276,35 +379,39 @@ system(paste("echo Plots saved into 'work-dir/data/images/plots'"))
 
 ### Identify chimeric sequences:
 
-system(paste("echo Removing chimeric sequences..."))
-
-bimFs <- sapply(dadaFs, isBimeraDenovo, verbose=TRUE)
-bimRs <- sapply(dadaRs, isBimeraDenovo, verbose=TRUE)
-
-print(unname(sapply(bimFs, mean)), digits=2)
-print(unname(sapply(bimRs, mean)), digits=2)
-
-
-
-### Merge paired reads
-
-mergers <- mapply(mergePairs, dadaFs, derepFs, dadaRs, derepRs, SIMPLIFY=FALSE)
+if (inputtype=="pair") {
+  system(paste("echo Removing chimeric sequences..."))
+  bimFs <- sapply(dadaFs, isBimeraDenovo, verbose=TRUE)
+  bimRs <- sapply(dadaRs, isBimeraDenovo, verbose=TRUE)
+  print(unname(sapply(bimFs, mean)), digits=2)
+  print(unname(sapply(bimRs, mean)), digits=2)
+  ### Merge paired reads
+  mergers <- mapply(mergePairs, dadaFs, derepFs, dadaRs, derepRs, SIMPLIFY=FALSE)
+}
 
 
 
 ### Remove chimeras 
 
-mergers.nochim <- mapply(function(mm, bF, bR) mm[!bF[mm$forward] & !bR[mm$reverse],], mergers, bimFs, bimRs, SIMPLIFY=FALSE) 
-
+if (inputtype=="pair") {
+  mergers.nochim <- mapply(function(mm, bF, bR) mm[!bF[mm$forward] & !bR[mm$reverse], ], mergers, bimFs, bimRs, SIMPLIFY=FALSE) 
+}
 
 
 ### Constructing the sequence table
 
 system(paste("echo Building tables..."))
 
-seqtab <- makeSequenceTable(mergers.nochim)
-seqtab2 <- seqtab[,nchar(colnames(seqtab)) %in% seq(80,120)]
-
+if (inputtype=="pair") {
+  seqtab <- makeSequenceTable(mergers.nochim)
+  seqtab2 <- seqtab[,nchar(colnames(seqtab)) %in% seq(80,120)]
+} else {
+  seqtab <- makeSequenceTable(dadaFs)
+  system(paste("echo Removing chimeric sequences..."))
+  seqtab.nochim <- removeBimeraDenovo(seqtab, multithread=TRUE, verbose=TRUE)
+  seqtab2 <- seqtab.nochim[,nchar(colnames(seqtab.nochim)) %in% seq(80,120)]
+  seqtab2 <- t(seqtab2)
+}
 
 
 ### Make otu_table
@@ -340,11 +447,11 @@ write.csv(transotab, paste0(path, "data/otutable.csv"))
 
 ### Making BLAST database
 
-system(paste("/home/carloslima/tools/ncbi-blast-2.15.0+/bin//makeblastdb -dbtype nucl -in", paste0(path,vert_fasta)))
+system(paste("makeblastdb -dbtype nucl -in", paste0(path,vert_fasta)))
 
 system(paste("echo Blasting..."))
 
-system(paste("/home/carloslima/tools/ncbi-blast-2.15.0+/bin//blastn -query", paste0(path, tax_sequences),  "-db", paste0(path, vert_fasta), "-outfmt '6 qseq qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore' -max_target_seqs 1 -out", paste0(path, blastout)))
+system(paste("blastn -query", paste0(path, tax_sequences),  "-db", paste0(path, vert_fasta), "-outfmt '6 qseq qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore' -max_target_seqs 1 -out", paste0(path, blastout)))
 # Additional column headers can be found on https://www.metagenomics.wiki/tools/blast/blastn-output-format-6.
 # Can rename columns but must be in same order as above.
 
@@ -352,7 +459,7 @@ blasttable <- read.table(paste0(path, blastout))
 
 colnames(blasttable) <- c("qseq", "qid", "sid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
 
-paste("/home/carloslima/tools/ncbi-blast-2.15.0+/bin//blastn -query", paste0(path, tax_sequences),  "-db", paste0(path, vert_fasta), "-outfmt 6 -max_target_seqs 1 -out", paste0(path, blastout))
+paste("blastn -query", paste0(path, tax_sequences),  "-db", paste0(path, vert_fasta), "-outfmt 6 -max_target_seqs 1 -out", paste0(path, blastout))
 
 
 blastresults <- blasttable %>%
@@ -397,14 +504,15 @@ ps <- phyloseq(otab, taxtab)
 ### Plotting most abundant taxonomies by sample
 
 system(paste("echo Done! Now plotting most abundant taxonomies by sample..."))
-toptaxa <- names(sort(taxa_sums(ps), decreasing=TRUE))[1:5]
+ps.nona <- subset_taxa(ps, !is.na(taxa)) ### MODIFICADO
+toptaxa <- names(sort(taxa_sums(ps.nona), decreasing=TRUE))[1:5]
 ps.toptaxa <- transform_sample_counts(ps, function(OTU) OTU/sum(OTU))
 ps.toptaxa <- prune_taxa(toptaxa, ps.toptaxa)
 
 for (sample_name in row.names(otu_table(ps.toptaxa))){
   ps.toptaxa_sample <- prune_samples(sample_name, ps.toptaxa)
   png(filename = paste0(path, "data/images/plots/", sample_name, "_toptaxa.png"), width = 800, height = 600)
-  plot <- plot_bar(ps.toptaxa_sample, x = "taxa", y = "Abundance", fill = "taxa", title = paste0("Most abundant taxa for sample ",sample_name))
+  plot <- plot_bar(ps.toptaxa_sample, x = "taxa", y = "Abundance", fill = "taxa", title = paste0("Most abundant taxa in sample ",sample_name))
   print(plot)
   dev.off()
 }
@@ -450,14 +558,20 @@ create_report <- function(sample,top,sec){
                                   trimLeft = trimLeft,
                                   maxEE = maxEE,
                                   species = top,
-                                  species2 = sec))
+                                  species2 = sec,
+                                  database = database,
+                                  inputtype = inputtype))
 }
 
 rep_dir <- paste0(path,"reports")
 if(!dir.exists(rep_dir)){dir.create(rep_dir)}
 
 for (sample_name in sam_names) {
-  ps.toptaxa_sample <- prune_samples(sample_name, ps.toptaxa)
+  if (length(sam_names)==1){
+    ps.toptaxa_sampl <- ps.toptaxa
+  } else {
+    ps.toptaxa_sample <- prune_samples(sample_name, ps.toptaxa)
+  }
   otu_data <- as.data.frame(otu_table(ps.toptaxa_sample))
   topseq <- names(otu_data)[which.max(otu_data)]
   toptaxa <- tax_table(ps.toptaxa_sample)[topseq]
