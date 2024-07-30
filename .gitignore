@@ -1,0 +1,9 @@
+work-dir/*_filt.fastq.gz
+work-dir/data/images/plots/
+work-dir/data/otutable.csv
+work-dir/data/otutable.txt
+work-dir/data/taxsequences.fna
+work-dir/data/taxtable.csv
+work-dir/data/taxtable.txt
+work-dir/reports/
+work-dir/data-raw/
